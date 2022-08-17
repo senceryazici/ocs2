@@ -251,15 +251,17 @@ matrix_t LeggedRobotInterface::initializeInputCostWeight(const std::string& task
   }
 
   matrix_t R_taskspace(totalContactDim + totalContactDim, totalContactDim + totalContactDim);
-  loadData::loadEigenMatrix(taskFile, "R", R_taskspace);
-
   matrix_t R = matrix_t::Zero(info.inputDim, info.inputDim);
-  // Contact Forces
-  R.topLeftCorner(totalContactDim, totalContactDim) = R_taskspace.topLeftCorner(totalContactDim, totalContactDim);
-  // Joint velocities
-  R.bottomRightCorner(info.actuatedDofNum, info.actuatedDofNum) =
-      baseToFeetJacobians.transpose() * R_taskspace.bottomRightCorner(totalContactDim, totalContactDim) * baseToFeetJacobians;
+  loadData::loadEigenMatrix(taskFile, "R", R);
   return R;
+  // std::cerr << "Input dimension: " << info.inputDim << std::endl;
+  // matrix_t R = matrix_t::Zero(info.inputDim, info.inputDim);
+  // Contact Forces
+  // R.topLeftCorner(totalContactDim, totalContactDim) = R_taskspace.topLeftCorner(totalContactDim, totalContactDim);
+  // Joint velocities
+  // R.bottomRightCorner(info.actuatedDofNum, info.actuatedDofNum) =
+      // baseToFeetJacobians.transpose() * R_taskspace.bottomRightCorner(totalContactDim, totalContactDim) * baseToFeetJacobians;
+  // return R;
 }
 
 /******************************************************************************************************/

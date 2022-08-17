@@ -2,19 +2,19 @@ centroidalModelType             1      // 0: FullCentroidalDynamics, 1: Single R
   
 legged_robot_interface
 {
-  verbose                               false  // show the loaded parameters
+  verbose                               true  // show the loaded parameters
   useAnalyticalGradientsDynamics        false
   useAnalyticalGradientsConstraints     false
 }
 
 model_settings
 {
-  positionErrorGain             0.0
+  positionErrorGain             0.01
   phaseTransitionStanceTime     0.4
 
   verboseCppAd                  true
   recompileLibrariesCppAd       true
-  modelFolderCppAd              /tmp/ocs2
+  modelFolderCppAd              /tmp/ocs2_ros2
 }
 
 swing_trajectory_config
@@ -58,16 +58,16 @@ ddp
   minRelCost                      1e-1
   constraintTolerance             5e-3
 
-  displayInfo                     false
-  displayShortSummary             false
+  displayInfo                     true
+  displayShortSummary             true
   checkNumericalStability         false
   debugPrintRollout               false
   debugCaching                    false
 
   AbsTolODE                       1e-5
   RelTolODE                       1e-3
-  maxNumStepsPerSecond            10000
-  timeStep                        0.015
+  maxNumStepsPerSecond            50000
+  timeStep                        1e-2
   backwardPassIntegratorType      ODE45
 
   constraintPenaltyInitialValue   20.0
@@ -75,15 +75,15 @@ ddp
 
   preComputeRiccatiTerms          true
 
-  useFeedbackPolicy               false
+  useFeedbackPolicy               true
 
   strategy                        LINE_SEARCH
   lineSearch
   {
-    minStepLength                 1e-2
+    minStepLength                 1e-4
     maxStepLength                 1.0
     hessianCorrectionStrategy     DIAGONAL_SHIFT
-    hessianCorrectionMultiple     1e-5
+    hessianCorrectionMultiple     1e-8
   }
 }
 
@@ -92,7 +92,7 @@ rollout
 {
   AbsTolODE                       1e-5
   RelTolODE                       1e-3
-  timeStep                        0.015
+  timeStep                        1e-2
   integratorType                  ODE45
   maxNumStepsPerSecond            10000
   checkNumericalStability         false
@@ -101,47 +101,58 @@ rollout
 mpc
 {
   timeHorizon                     1.0  ; [s]
-  solutionTimeWindow              -1   ; maximum [s]
+  solutionTimeWindow              -1.0   ; maximum [s]
   coldStart                       false
 
-  debugPrint                      false
+  debugPrint                      true
 
-  mpcDesiredFrequency             50  ; [Hz]
+  mpcDesiredFrequency             -1  ; [Hz]
   mrtDesiredFrequency             400 ; [Hz]
 }
 
 initialState
 {
-   ;; Normalized Centroidal Momentum: [linear, angular] ;;
-   (0,0)  0.0     ; vcom_x
-   (1,0)  0.0     ; vcom_y
-   (2,0)  0.0     ; vcom_z
-   (3,0)  0.0     ; L_x / robotMass
-   (4,0)  0.0     ; L_y / robotMass
-   (5,0)  0.0     ; L_z / robotMass
+  ;; Normalized Centroidal Momentum: [linear, angular] ;;
+  (0,0)  0.0     ; vcom_x
+  (1,0)  0.0     ; vcom_y
+  (2,0)  0.0     ; vcom_z
+  (3,0)  0.0     ; L_x / robotMass
+  (4,0)  0.0     ; L_y / robotMass
+  (5,0)  0.0     ; L_z / robotMass
 
-   ;; Base Pose: [position, orientation] ;;
-   (6,0)  0.0     ; p_base_x
-   (7,0)  0.0     ; p_base_y
-   (8,0)  0.575   ; p_base_z
-   (9,0)  0.0     ; theta_base_z
-   (10,0) 0.0     ; theta_base_y
-   (11,0) 0.0     ; theta_base_x
+  ;; Base Pose: [position, orientation] ;;
+  (6,0)  0.0     ; p_base_x
+  (7,0)  0.0     ; p_base_y
+  (8,0)  0.8     ; p_base_z
+  (9,0)  0.0     ; theta_base_z
+  (10,0) 0.0     ; theta_base_y
+  (11,0) 0.0     ; theta_base_x
 
-   ;; Leg Joint Positions: [LF, LH, RF, RH] ;;
-   (12,0) -0.25   ; LF_HAA
-   (13,0)  0.60   ; LF_HFE
-   (14,0) -0.85   ; LF_KFE
-   (15,0) -0.25   ; LH_HAA
-   (16,0) -0.60   ; LH_HFE
-   (17,0)  0.85   ; LH_KFE
-   (18,0)  0.25   ; RF_HAA
-   (19,0)  0.60   ; RF_HFE
-   (20,0) -0.85   ; RF_KFE
-   (21,0)  0.25   ; RH_HAA
-   (22,0) -0.60   ; RH_HFE
-   (23,0)  0.85   ; RH_KFE
-}
+  ;; TODO FIX (senceryazici):
+  ;; expected: 
+  ;; [LF, LH, RF, RH]
+  ;; actual:
+  ;; [LF, RF, LH, RH]
+  ;; [+, -, -, +]
+
+  ;; Leg Joint Positions: [LF, LH, RF, RH] ;;
+  (12,0)  0.00   ; AL_coxa_joint
+  (13,0)  0.65   ; AL_femur_joint
+  (14,0) -1.30   ; AL_tibia_joint
+  (15,0)  0.00   ; AL_steer_joint
+  (16,0)  0.00   ; AR_coxa_joint
+  (17,0)  0.65   ; AR_femur_joint
+  (18,0) -1.30   ; AR_tibia_joint
+  (19,0)  0.00   ; AR_steer_joint
+  (20,0)  0.00   ; BL_coxa_joint
+  (21,0) -0.65   ; BL_femur_joint
+  (22,0)  1.30   ; BL_tibia_joint
+  (23,0)  0.00   ; BL_steer_joint
+  (24,0)  0.00   ; BR_coxa_joint
+  (25,0) -0.65   ; BR_femur_joint
+  (26,0)  1.30   ; BR_tibia_joint
+  (27,0)  0.00   ; BR_steer_joint
+} 
 
 ; standard state weight matrix
 Q
@@ -160,23 +171,27 @@ Q
   (6,6)   500.0    ; p_base_x
   (7,7)   500.0    ; p_base_y
   (8,8)   500.0    ; p_base_z
-  (9,9)   100.0    ; theta_base_z
-  (10,10) 200.0    ; theta_base_y
-  (11,11) 200.0    ; theta_base_x
+  (9,9)   1500.0    ; theta_base_z
+  (11,11) 2000.0    ; theta_base_x
+  (10,10) 2000.0    ; theta_base_y
 
   ;; Leg Joint Positions: [LF, LH, RF, RH] ;;
-  (12,12) 20.0     ; LF_HAA
-  (13,13) 20.0     ; LF_HFE
-  (14,14) 20.0     ; LF_KFE
-  (15,15) 20.0     ; LH_HAA
-  (16,16) 20.0     ; LH_HFE
-  (17,17) 20.0     ; LH_KFE
-  (18,18) 20.0     ; RF_HAA
-  (19,19) 20.0     ; RF_HFE
-  (20,20) 20.0     ; RF_KFE
-  (21,21) 20.0     ; RH_HAA
-  (22,22) 20.0     ; RH_HFE
-  (23,23) 20.0     ; RH_KFE
+  (12,12) 20.00    ; AL_coxa_joint
+  (13,13) 20.00    ; AL_femur_joint
+  (14,14) 20.00    ; AL_tibia_joint
+  (15,15) 20.00    ; AL_steer_joint
+  (16,16) 20.00    ; AR_coxa_joint
+  (17,17) 20.00    ; AR_femur_joint
+  (18,18) 20.00    ; AR_tibia_joint
+  (19,19) 20.00    ; AR_steer_joint
+  (20,20) 20.00    ; BL_coxa_joint
+  (21,21) 20.00    ; BL_femur_joint
+  (22,22) 20.00    ; BL_tibia_joint
+  (23,23) 20.00    ; BL_steer_joint
+  (24,24) 20.00    ; BR_coxa_joint
+  (25,25) 20.00    ; BR_femur_joint
+  (26,26) 20.00    ; BR_tibia_joint
+  (27,27) 20.00    ; BR_steer_joint
 }
 
 ; control weight matrix
@@ -199,6 +214,7 @@ R
   (11,11) 1.0       ; right_hind_force
 
   ;; foot velocity relative to base: [LF, LH, RF, RH] (uses the Jacobian at nominal configuration) ;;
+  ;; senceryazici: It's definetely NOT!!!!!!
   (12,12) 5000.0    ; x
   (13,13) 5000.0    ; y
   (14,14) 5000.0    ; z
@@ -211,6 +227,10 @@ R
   (21,21) 5000.0    ; x
   (22,22) 5000.0    ; y
   (23,23) 5000.0    ; z
+  (24,24) 5000.0    ; z
+  (25,25) 5000.0    ; z
+  (26,26) 5000.0    ; z
+  (27,27) 5000.0    ; z
 }
 
 frictionConeSoftConstraint

@@ -102,8 +102,17 @@ int main(int argc, char** argv) {
   // Initial state
   SystemObservation initObservation;
   initObservation.state = interface.getInitialState();
-  initObservation.input = vector_t::Zero(interface.getCentroidalModelInfo().inputDim);
+  initObservation.input = vector_t::Zero(24);
   initObservation.mode = ModeNumber::STANCE;
+  std::cerr << "********************************************************" << std::endl;
+  std::cerr << "current time: " << nodeHandle->now().seconds() << std::endl;
+  std::cerr << "message time: " << initObservation.time << std::endl;
+  std::cerr << "state size: " << initObservation.state.size() << std::endl;
+  std::cerr << "input size: " << initObservation.input.size() << std::endl;
+  std::cerr << "state vector: " << initObservation.state.transpose() << std::endl;
+  std::cerr << "input vector: " << initObservation.input.transpose() << std::endl;
+  std::cerr << "********************************************************" << std::endl;
+
 
   // Initial command
   TargetTrajectories initTargetTrajectories({0.0}, {initObservation.state}, {initObservation.input});

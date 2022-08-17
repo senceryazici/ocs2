@@ -173,7 +173,9 @@ void SLQ::calculateControllerWorker(size_t timeIndex, const PrimalDataContainer&
 scalar_t SLQ::solveSequentialRiccatiEquations(const ScalarFunctionQuadraticApproximation& finalValueFunction) {
   // fully compute the riccatiModifications and projected modelData
   // number of the intermediate LQ variables
+  std::cerr << "SLQ solveSequentialRiccatiEquations begin" << std::endl;
   const size_t N = nominalPrimalData_.primalSolution.timeTrajectory_.size();
+  std::cerr << "resizing vectors to: " << N << std::endl;
 
   dualData_.riccatiModificationTrajectory.resize(N);
   dualData_.projectedModelDataTrajectory.resize(N);
@@ -211,15 +213,31 @@ matrix_t SLQ::computeHamiltonianHessian(const ModelData& modelData, const matrix
 /******************************************************************************************************/
 void SLQ::riccatiEquationsWorker(size_t workerIndex, const std::pair<int, int>& partitionInterval,
                                  const ScalarFunctionQuadraticApproximation& finalValueFunction) {
+  std::cerr << "SLQ::riccatiEquationsWorker " << workerIndex << " begin" << std::endl;
   // set data for Riccati equations
   riccatiEquationsPtrStock_[workerIndex]->resetNumFunctionCalls();
+  std::cerr << "SLQ::riccatiEquationsWorker " << workerIndex << " setData" << std::endl;
+
   riccatiEquationsPtrStock_[workerIndex]->setData(&(nominalPrimalData_.primalSolution.timeTrajectory_),
                                                   &(dualData_.projectedModelDataTrajectory),
                                                   &(nominalPrimalData_.primalSolution.postEventIndices_),
                                                   &(nominalPrimalData_.modelDataEventTimes), &(dualData_.riccatiModificationTrajectory));
+  std::cerr << "SLQ::riccatiEquationsWorker " << workerIndex << " setData done" << std::endl;
 
   const auto& nominalTimeTrajectory = nominalPrimalData_.primalSolution.timeTrajectory_;
+  
+  std::cerr << "SLQ::riccatiEquationsWorker " << workerIndex << " nominal time traj.: ";
+  for (const auto &time : nominalTimeTrajectory) {
+    std::cerr << time << " ";
+  }
+  std::cerr << std::endl;
+
   const auto& nominalEventsPastTheEndIndices = nominalPrimalData_.primalSolution.postEventIndices_;
+  std::cerr << "SLQ::riccatiEquationsWorker " << workerIndex << " nominal event past end ind.: ";
+  for (const auto &time : nominalEventsPastTheEndIndices) {
+    std::cerr << time << " ";
+  }
+  std::cerr << std::endl;
 
   auto& valueFunctionTrajectory = dualData_.valueFunctionTrajectory;
 
@@ -239,6 +257,7 @@ void SLQ::riccatiEquationsWorker(size_t workerIndex, const std::pair<int, int>& 
    */
   vector_array_t& allSsTrajectory = allSsTrajectoryStock_[workerIndex];
   allSsTrajectory.clear();
+  std::cerr << "SLQ::riccatiEquationsWorker " << workerIndex << " nominal event past end ind.: " << std::endl;
   integrateRiccatiEquationNominalTime(*riccatiIntegratorPtrStock_[workerIndex], *riccatiEquationsPtrStock_[workerIndex], partitionInterval,
                                       nominalTimeTrajectory, nominalEventsPastTheEndIndices, std::move(allSsFinal), SsNormalizedTime,
                                       SsNormalizedPostEventIndices, allSsTrajectory);

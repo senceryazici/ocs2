@@ -124,6 +124,22 @@ void LeggedRobotVisualizer::publishObservation(rclcpp::Time timeStamp, const Sys
     feetForces[i] = centroidal_model::getContactForces(observation.input, i, centroidalModelInfo_);
   }
 
+  std::cerr << "****************************************************************************************" << std::endl;
+  std::cerr << "Publishing observation" << std::endl;
+  std::cerr << "Base pose: " << basePose.transpose() << std::endl;
+  std::cerr << "Joint angles: " << qJoints.transpose() << std::endl;
+  std::cerr << "Feet positions (0): " << feetPositions.at(0).transpose() << std::endl;
+  std::cerr << "Feet positions (1): " << feetPositions.at(1).transpose() << std::endl;
+  std::cerr << "Feet positions (2): " << feetPositions.at(2).transpose() << std::endl;
+  std::cerr << "Feet positions (3): " << feetPositions.at(3).transpose() << std::endl;
+  std::cerr << "Feet forces (0): " << feetForces.at(0).transpose() << std::endl;
+  std::cerr << "Feet forces (1): " << feetForces.at(1).transpose() << std::endl;
+  std::cerr << "Feet forces (2): " << feetForces.at(2).transpose() << std::endl;
+  std::cerr << "Feet forces (3): " << feetForces.at(3).transpose() << std::endl;
+  std::cerr << "Time: " << observation.time << std::endl;
+  std::cerr << "qSize: " << qJoints.size() << std::endl;
+  std::cerr << "****************************************************************************************" << std::endl;
+
   // Publish
   publishJointTransforms(timeStamp, qJoints);
   publishBaseTransform(timeStamp, basePose);
@@ -134,10 +150,28 @@ void LeggedRobotVisualizer::publishObservation(rclcpp::Time timeStamp, const Sys
 /******************************************************************************************************/
 /******************************************************************************************************/
 void LeggedRobotVisualizer::publishJointTransforms(rclcpp::Time timeStamp, const vector_t& jointAngles) {
-  std::map<std::string, scalar_t> jointPositions{{"LF_HAA", jointAngles[0]}, {"LF_HFE", jointAngles[1]},  {"LF_KFE", jointAngles[2]},
-                                                  {"LH_HAA", jointAngles[3]}, {"LH_HFE", jointAngles[4]},  {"LH_KFE", jointAngles[5]},
-                                                  {"RF_HAA", jointAngles[6]}, {"RF_HFE", jointAngles[7]},  {"RF_KFE", jointAngles[8]},
-                                                  {"RH_HAA", jointAngles[9]}, {"RH_HFE", jointAngles[10]}, {"RH_KFE", jointAngles[11]}};
+  std::cerr << "Publishing joint transforms, " << jointAngles << "\nsize:" << jointAngles.rows() << " " << jointAngles.cols() << std::endl;
+  std::map<std::string, scalar_t> jointPositions{
+          {"AL_coxa_joint", jointAngles[0]},
+          {"AL_femur_joint", jointAngles[1]},
+          {"AL_tibia_joint", jointAngles[2]},
+          {"AL_steer_joint", jointAngles[3]},
+          {"AL_wheel_joint", 0.0},
+          {"AR_coxa_joint", jointAngles[4]},
+          {"AR_femur_joint", jointAngles[5]},
+          {"AR_tibia_joint", jointAngles[6]},
+          {"AR_steer_joint", jointAngles[7]},
+          {"AR_wheel_joint", 0.0},
+          {"BL_coxa_joint", jointAngles[8]},
+          {"BL_femur_joint", jointAngles[9]},
+          {"BL_tibia_joint", jointAngles[10]},
+          {"BL_steer_joint", jointAngles[11]},
+          {"BL_wheel_joint", 0.0},
+          {"BR_coxa_joint", jointAngles[12]},
+          {"BR_femur_joint", jointAngles[13]},
+          {"BR_tibia_joint", jointAngles[14]},
+          {"BR_steer_joint", jointAngles[15]},
+          {"BR_wheel_joint", 0.0}};
   this->publishTransforms(jointPositions, timeStamp);
 }
 
@@ -147,7 +181,7 @@ void LeggedRobotVisualizer::publishJointTransforms(rclcpp::Time timeStamp, const
 void LeggedRobotVisualizer::publishBaseTransform(rclcpp::Time timeStamp, const vector_t& basePose) {
   geometry_msgs::msg::TransformStamped baseToWorldTransform;
   baseToWorldTransform.header = getHeaderMsg(frameId_, timeStamp);
-  baseToWorldTransform.child_frame_id = "base";
+  baseToWorldTransform.child_frame_id = "base_link";
 
   const Eigen::Quaternion<scalar_t> q_world_base = getQuaternionFromEulerAnglesZyx(vector3_t(basePose.tail<3>()));
   baseToWorldTransform.transform.rotation = getOrientationMsg(q_world_base);

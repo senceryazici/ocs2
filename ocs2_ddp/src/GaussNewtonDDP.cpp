@@ -525,6 +525,7 @@ scalar_t GaussNewtonDDP::calculateRolloutMerit(const PerformanceIndex& performan
 scalar_t GaussNewtonDDP::solveSequentialRiccatiEquationsImpl(const ScalarFunctionQuadraticApproximation& finalValueFunction) {
   // pre-allocate memory for dual solution
   const size_t outputN = nominalPrimalData_.primalSolution.timeTrajectory_.size();
+  std::cerr << "[GaussNewtonDDP::solveSequentialRiccatiEquationsImpl] outputN = " << outputN << '\n';
   dualData_.valueFunctionTrajectory.clear();
   dualData_.valueFunctionTrajectory.resize(outputN);
 
@@ -537,7 +538,9 @@ scalar_t GaussNewtonDDP::solveSequentialRiccatiEquationsImpl(const ScalarFunctio
   // solve it sequentially for the first iteration
   if (totalNumIterations_ == 0) {
     const std::pair<int, int> partitionInterval{0, outputN - 1};
+    std::cerr << "[GaussNewtonDDP::solveSequentialRiccatiEquationsImpl] solving for the first iteration\n";
     riccatiEquationsWorker(0, partitionInterval, finalValueFunction);
+    std::cerr << "[GaussNewtonDDP::solveSequentialRiccatiEquationsImpl] solving for the first iteration done\n";
   } else {  // solve it in parallel
     // do equal-time partitions based on available thread resource
     std::vector<std::pair<int, int>> partitionIntervals =
@@ -991,6 +994,7 @@ void GaussNewtonDDP::runInit() {
 
   // solve Riccati equations
   backwardPassTimer_.startTimer();
+  std::cerr << "findme4" << std::endl;
   avgTimeStepBP_ = solveSequentialRiccatiEquations(heuristics_);
   backwardPassTimer_.endTimer();
 

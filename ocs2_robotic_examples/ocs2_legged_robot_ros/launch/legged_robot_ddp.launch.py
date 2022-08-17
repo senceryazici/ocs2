@@ -18,11 +18,11 @@ from launch_ros.actions import Node
 def generate_launch_description():
     ocs2_robotic_assets_dir = get_package_share_directory('ocs2_robotic_assets')
     ocs2_legged_robot_dir = get_package_share_directory('ocs2_legged_robot')
-    description_name = "legged_robot_description"
 
     task_file = os.path.join(ocs2_legged_robot_dir, 'config', 'mpc', 'task.info')
     reference_file = os.path.join(ocs2_legged_robot_dir, 'config', 'command', 'reference.info')
-    urdf_file = os.path.join(ocs2_robotic_assets_dir, 'resources', 'anymal_c', 'urdf', 'anymal.urdf')
+    # urdf_file = os.path.join(ocs2_robotic_assets_dir, 'resources', 'anymal_c', 'urdf', 'anymal.urdf')
+    urdf_file = os.path.join(get_package_share_directory('parakletex1a_description'), 'urdf', 'parakletex1a.urdf')
     gait_command_file = os.path.join(ocs2_legged_robot_dir, 'config', 'command', 'gait.info')
     robot_name = "legged_robot"
     config_name = "mpc"
@@ -49,6 +49,7 @@ def generate_launch_description():
                 {"task_file": task_file},
                 {"reference_file": reference_file},
                 ],
+            # prefix=["gnome-terminal --"],
             output='screen',
         ),
         Node(
@@ -63,7 +64,7 @@ def generate_launch_description():
                 {"reference_file": reference_file},
                 ],
             output='screen',
-            prefix=["gnome-terminal --"],
+            # prefix=["gnome-terminal --"],
         ),
         Node(
             name='legged_robot_target',

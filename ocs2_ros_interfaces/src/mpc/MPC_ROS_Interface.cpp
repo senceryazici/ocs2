@@ -247,7 +247,14 @@ void MPC_ROS_Interface::mpcObservationCallback(const ocs2_msgs::msg::MPCObservat
 
   // current time, state, input, and subsystem
   const auto currentObservation = ros_msg_conversions::readObservationMsg(*msg);
-
+  std::cerr << "********************************************************" << std::endl;
+  std::cerr << "current time: " << node_->now().seconds() << std::endl;
+  std::cerr << "message time: " << currentObservation.time << std::endl;
+  std::cerr << "state size: " << currentObservation.state.size() << std::endl;
+  std::cerr << "input size: " << currentObservation.input.size() << std::endl;
+  std::cerr << "state vector: " << currentObservation.state.transpose() << std::endl;
+  std::cerr << "input vector: " << currentObservation.input.transpose() << std::endl;
+  std::cerr << "********************************************************" << std::endl;
   // measure the delay in running MPC
   mpcTimer_.startTimer();
 
@@ -322,6 +329,8 @@ void MPC_ROS_Interface::shutdownNode() {
 /******************************************************************************************************/
 void MPC_ROS_Interface::launchNodes(rclcpp::Node::SharedPtr& nodeHandle) {
   RCLCPP_INFO_STREAM(LOGGER, "MPC node is setting up ...");
+
+  node_ = nodeHandle;
 
   using namespace std::placeholders;
 
